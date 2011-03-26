@@ -243,6 +243,10 @@ module Spec
           else
             example_proxies.select {|proxy| proxy.location =~ /:#{run_options.example_line}:?/}
           end
+        elsif run_options.line_range
+          example_proxies.select do |proxy|
+            run_options.line_range.include? proxy.location[/\d+$/].to_i
+          end
         else
           example_proxies.reject do |proxy|
             matcher = ExampleGroupMethods.matcher_class.
@@ -253,7 +257,7 @@ module Spec
       end
 
       def examples_were_specified?(run_options)
-        !run_options.examples.empty?
+        !run_options.examples.empty? || run_options.line_range
       end
 
       def method_added(name) # :nodoc:
