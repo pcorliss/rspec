@@ -46,6 +46,7 @@ module Spec
         :user_input_for_runner,
         :error_stream,
         :output_stream,
+        :line_range,
         # TODO: BT - Figure out a better name
         :argv
       )
@@ -73,6 +74,7 @@ module Spec
         @after_suite_parts = []
         @files_loaded = false
         @out_used = nil
+        @line_range = nil
       end
 
       def add_example_group(example_group)

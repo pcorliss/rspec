@@ -40,6 +40,7 @@ module Spec
         :specification => ["-s", "--specification [NAME]", "DEPRECATED - use -e instead", "(This will be removed when autotest works with -e)"],
         :line => ["-l", "--line LINE_NUMBER", Integer, "Execute example group or example at given line.",
                                                        "(does not work for dynamically generated examples)"],
+        :line_range => ["-g", "--range RANGE", "Range specified."],
         :format => ["-f", "--format FORMAT[:WHERE]","Specifies what format to use for output. Specify WHERE to tell",
                                                     "the formatter where to write the output. All built-in formats",
                                                     "expect WHERE to be a file name, and will write to $stdout if it's",
@@ -100,6 +101,10 @@ module Spec
         on(*OPTIONS[:example])          {|example| @options.parse_example(example)}
         on(*OPTIONS[:specification])    {|example| @options.parse_example(example)}
         on(*OPTIONS[:line])             {|line_number| @options.line_number = line_number.to_i}
+        on(*OPTIONS[:line_range])       do |line_range|
+          start_line,end_line = line_range.split(':')
+          @options.line_range = (start_line.to_i..end_line.to_i)
+        end
         on(*OPTIONS[:format])           {|format| @options.parse_format(format)}
         on(*OPTIONS[:require])          {|requires| invoke_requires(requires)}
         on(*OPTIONS[:backtrace])        {@options.backtrace_tweaker = NoisyBacktraceTweaker.new}
@@ -130,7 +135,10 @@ module Spec
         return if parse_drb
 
         super(@argv) do |file|
-          if file =~ /^(.+):(\d+)$/
+          if file =~ /^(.+):(\d+):(\d+)$/
+            file = $1
+            @options.line_range = (($2.to_i)..($3.to_i))
+          elsif file =~ /^(.+):(\d+)$/
             file = $1
             @options.line_number = $2.to_i
           end
